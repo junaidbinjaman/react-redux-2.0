@@ -1,4 +1,7 @@
-const {createStore} = require('redux');
+const {createStore, applyMiddleware, combineReducers} = require('redux');
+const thunk = require('redux-thunk').default;
+const axios = require('axios');
+const logger = require('redux-logger').createLogger();
 
 // Initial state
 const initialState = {
@@ -7,14 +10,14 @@ const initialState = {
 
 const incrementAction = {
     type: 'INCREMENT',
-    payload: {task: 'Learn Redux'}
-  };
-  
-  const decrementAction = {
-    type: 'DECREMENT'
-  };
+    payload: {task: 'Learn Redux'},
+};
 
-// Reducer function
+const decrementAction = {
+    type: 'DECREMENT',
+};
+
+// Reducer functions
 const counterReducer = (state = initialState, action) => {
     switch (action.type) {
         case 'INCREMENT':
@@ -32,16 +35,33 @@ const counterReducer = (state = initialState, action) => {
     }
 };
 
-const store = createStore(counterReducer);
+const userReducer = (state = {name: 'Anonymous'}, action) => {
+    switch (action.type) {
+        case 'SET_USER':
+            return {
+                ...state,
+                user: action.payload,
+            };
+        default:
+            return state;
+    }
+};
 
-const getCount = state => state.count;
-
-const unsubscribe = store.subscribe(() => {
-    console.log('State Changed: ', getCount(store.getState()));
+const rootReducer = combineReducers({
+    counter: counterReducer,
+    user: userReducer
 })
 
+const store = createStore(rootReducer, applyMiddleware(logger));
+
+const getCount = (state) => state.count;
+
+// const unsubscribe = store.subscribe(() => {
+//     console.log('State Changed: ', getCount(store.getState()));
+// })
+
 store.dispatch({type: 'INCREMENT'});
-store.dispatch({type: 'INCREMENT'});
+store.dispatch({type: 'SET_USER', payload: 'Junaid Bin Jaman'});
 store.dispatch({type: 'INCREMENT'});
 
-unsubscribe();
+// unsubscribe();
